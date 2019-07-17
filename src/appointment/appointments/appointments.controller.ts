@@ -1,29 +1,32 @@
 import { Controller, Get, Post, Body, Put, Delete, Res } from '@nestjs/common';
 
-import { Response } from 'express';
+import { FastifyReply } from 'fastify';
 
 @Controller('api/appointments')
 export class AppointmentsController {
-  private checkAppointmentLength(appointment: Object): boolean {
-    return (Object.keys(appointment).length > 0);
+  private static hasBody(appointment: Object): boolean {
+    return Object.keys(appointment).length > 0;
   }
 
   @Get()
-  getAppointment(): object {
-    return {
-      Client: {
-        appointments: [
+  getAppointment(@Res() res: FastifyReply<Response>): object {
+    return res.send({
+      "Client": {
+        "appointments": [
           {
-            appointmentId: new Date().toUTCString(),
+            "appointmentId": new Date().toUTCString(),
           },
         ],
       },
-    };
+    });
   }
 
   @Post()
-  createAppointment(@Body() appointment: Body, @Res() res: Response) {
-    if (this.checkAppointmentLength(appointment)) {
+  createAppointment(
+    @Body() appointment: Body,
+    @Res() res: FastifyReply<Response>,
+  ) {
+    if (AppointmentsController.hasBody(appointment)) {
       appointment['appointmentDate'] = new Date().toISOString();
       appointment[
         'appointmentId'
@@ -44,8 +47,11 @@ export class AppointmentsController {
   }
 
   @Put()
-  updateAppointment(@Body() appointment: Body, @Res() res: Response): object {
-    if (this.checkAppointmentLength(appointment)) {
+  updateAppointment(
+    @Body() appointment: Body,
+    @Res() res: FastifyReply<Response>,
+  ): object {
+    if (AppointmentsController.hasBody(appointment)) {
       appointment['isUpdated'] = true;
 
       return res.send({
@@ -63,8 +69,11 @@ export class AppointmentsController {
   }
 
   @Delete()
-  deleteAppointment(@Body() appointment: Body, @Res() res: Response): object {
-    if (this.checkAppointmentLength(appointment)) {
+  deleteAppointment(
+    @Body() appointment: Body,
+    @Res() res: FastifyReply<Response>,
+  ): object {
+    if (AppointmentsController.hasBody(appointment)) {
       appointment['isDeleted'] = true;
 
       return res.send({
